@@ -13,6 +13,7 @@
 #include "rkcrypto_random.h"
 #include "test_utils.h"
 #include "rsa_key_data.h"
+#include "test_throughput.h"
 
 #define TEST_BLOCK_SIZE		1024 * 1024	/* 1MB */
 #define TEST_OTP_BLOCK_SIZE	500 * 1024
@@ -309,7 +310,7 @@ error:
 	return res;
 }
 
-static int test_cipher_tp(void)
+static int test_cipher_tp(int throughput_mode)
 {
 	int res = 0;
 	uint32_t h, j, k;
@@ -396,6 +397,9 @@ static int test_cipher_tp(void)
 
 	/* Test dma_fd cipher */
 	for (h = 0; h < ARRAY_SIZE(test_item_tbl); h++) {
+		if (throughput_mode != T_DMA_FD && throughput_mode != T_ALL)
+			break;
+
 		for (j = 0; j < ARRAY_SIZE(test_item_tbl[h].modes); j++) {
 			if (test_item_tbl[h].modes[j] == DATA_BUTT)
 				break;
@@ -417,10 +421,14 @@ static int test_cipher_tp(void)
 		}
 	}
 
-	printf("dma_fd:\ttest cipher throughput SUCCESS.\n\n");
+	if (throughput_mode == T_DMA_FD || throughput_mode == T_ALL)
+		printf("dma_fd:\ttest cipher throughput SUCCESS.\n\n");
 
 	/* Test virt cipher */
 	for (h = 0; h < ARRAY_SIZE(test_item_tbl); h++) {
+		if (throughput_mode != T_VIRT && throughput_mode != T_ALL)
+			break;
+
 		for (j = 0; j < ARRAY_SIZE(test_item_tbl[h].modes); j++) {
 			if (test_item_tbl[h].modes[j] == DATA_BUTT)
 				break;
@@ -442,7 +450,8 @@ static int test_cipher_tp(void)
 		}
 	}
 
-	printf("virt:\ttest cipher throughput SUCCESS.\n\n");
+	if (throughput_mode == T_VIRT || throughput_mode == T_ALL)
+		printf("virt:\ttest cipher throughput SUCCESS.\n\n");
 
 out:
 	if (in_out_fd)
@@ -637,7 +646,7 @@ error:
 	return res;
 }
 
-static int test_ae_tp(void)
+static int test_ae_tp(int throughput_mode)
 {
 	int res = 0;
 	uint32_t h, j;
@@ -726,6 +735,9 @@ static int test_ae_tp(void)
 
 	/* Test dma_fd cipher */
 	for (h = 0; h < ARRAY_SIZE(test_item_tbl); h++) {
+		if (throughput_mode != T_DMA_FD && throughput_mode != T_ALL)
+			break;
+
 		for (j = 0; j < ARRAY_SIZE(test_item_tbl[h].modes); j++) {
 			if (test_item_tbl[h].modes[j] == DATA_BUTT)
 				break;
@@ -745,11 +757,14 @@ static int test_ae_tp(void)
 			}
 		}
 	}
-
-	printf("dma_fd:\ttest aead throughput SUCCESS.\n\n");
+	if (throughput_mode == T_DMA_FD || throughput_mode == T_ALL)
+		printf("dma_fd:\ttest aead throughput SUCCESS.\n\n");
 
 	/* Test virt cipher */
 	for (h = 0; h < ARRAY_SIZE(test_item_tbl); h++) {
+		if (throughput_mode != T_VIRT && throughput_mode != T_ALL)
+			break;
+
 		for (j = 0; j < ARRAY_SIZE(test_item_tbl[h].modes); j++) {
 			if (test_item_tbl[h].modes[j] == DATA_BUTT)
 				break;
@@ -770,7 +785,8 @@ static int test_ae_tp(void)
 		}
 	}
 
-	printf("virt:\ttest aead throughput SUCCESS.\n\n");
+	if (throughput_mode == T_VIRT || throughput_mode == T_ALL)
+		printf("virt:\ttest aead throughput SUCCESS.\n\n");
 
 out:
 	if (in_fd)
@@ -896,7 +912,7 @@ error:
 	return res;
 }
 
-static int test_hash_tp(void)
+static int test_hash_tp(int throughput_mode)
 {
 	int res;
 	uint32_t buffer_len = TEST_BLOCK_SIZE;;
@@ -950,6 +966,9 @@ static int test_hash_tp(void)
 
 	/* Test virt hash */
 	for (i = 0; i < ARRAY_SIZE(test_hash_tbl); i++) {
+		if (throughput_mode != T_VIRT && throughput_mode != T_ALL)
+			break;
+
 		res = test_hash_item_tp(true, false, test_hash_tbl[i].algo,
 					test_hash_tbl[i].blocksize, input_virt, buffer_len);
 		if (res) {
@@ -958,10 +977,14 @@ static int test_hash_tp(void)
 		}
 	}
 
-	printf("virt:\ttest hash throughput SUCCESS.\n\n");
+	if (throughput_mode == T_VIRT || throughput_mode == T_ALL)
+		printf("virt:\ttest hash throughput SUCCESS.\n\n");
 
 	/* Test dma_fd hash */
 	for (i = 0; i < ARRAY_SIZE(test_hash_tbl); i++) {
+		if (throughput_mode != T_DMA_FD && throughput_mode != T_ALL)
+			break;
+
 		res = test_hash_item_tp(false, false, test_hash_tbl[i].algo,
 					test_hash_tbl[i].blocksize, input_fd, buffer_len);
 		if (res) {
@@ -970,10 +993,14 @@ static int test_hash_tp(void)
 		}
 	}
 
-	printf("dma_fd:\ttest hash throughput SUCCESS.\n\n");
+	if (throughput_mode == T_DMA_FD || throughput_mode == T_ALL)
+		printf("dma_fd:\ttest hash throughput SUCCESS.\n\n");
 
 	/* Test virt hmac */
 	for (i = 0; i < ARRAY_SIZE(test_hmac_tbl); i++) {
+		if (throughput_mode != T_VIRT && throughput_mode != T_ALL)
+			break;
+
 		res = test_hash_item_tp(true, true, test_hmac_tbl[i].algo,
 					test_hmac_tbl[i].blocksize, input_virt, buffer_len);
 		if (res) {
@@ -982,10 +1009,14 @@ static int test_hash_tp(void)
 		}
 	}
 
-	printf("virt:\ttest hmac throughput SUCCESS.\n\n");
+	if (throughput_mode == T_VIRT || throughput_mode == T_ALL)
+		printf("virt:\ttest hmac throughput SUCCESS.\n\n");
 
 	/* Test dma_fd hmac */
 	for (i = 0; i < ARRAY_SIZE(test_hmac_tbl); i++) {
+		if (throughput_mode != T_DMA_FD && throughput_mode != T_ALL)
+			break;
+
 		res = test_hash_item_tp(false, true, test_hmac_tbl[i].algo,
 					test_hmac_tbl[i].blocksize, input_fd, buffer_len);
 		if (res) {
@@ -994,7 +1025,8 @@ static int test_hash_tp(void)
 		}
 	}
 
-	printf("dma_fd:\ttest hmac throughput SUCCESS.\n\n");
+	if (throughput_mode == T_DMA_FD || throughput_mode == T_ALL)
+		printf("dma_fd:\ttest hmac throughput SUCCESS.\n\n");
 
 out:
 	if (input_fd)
@@ -1141,18 +1173,20 @@ out:
 	return 0;
 }
 
-RK_RES test_throughput(void)
+RK_RES test_throughput(int throughput_mode)
 {
-	if (test_otp_key_tp())
-		printf("Test otp key throughput FAILED.\n\n");
+	if (throughput_mode == T_OTP || throughput_mode == T_ALL) {
+		if (test_otp_key_tp())
+			printf("Test otp key throughput FAILED.\n\n");
+	}
 
-	if (test_cipher_tp())
+	if (test_cipher_tp(throughput_mode))
 		printf("Test cipher throughput FAILED.\n\n");
 
-	if (test_ae_tp())
+	if (test_ae_tp(throughput_mode))
 		printf("Test ae throughput FAILED.\n\n");
 
-	if (test_hash_tp())
+	if (test_hash_tp(throughput_mode))
 		printf("Test hash throughput FAILED.\n\n");
 
 	if (test_rsa_tp())
