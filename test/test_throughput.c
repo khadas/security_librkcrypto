@@ -476,6 +476,16 @@ static int test_ae_item_tp(bool is_virt, uint32_t key_len, uint32_t algo,
 	uint32_t rounds;
 	uint8_t iv_tmp[32];
 
+	/*
+	  The test case of aead will fall back to the software algorithm when it is calculated,
+	  and the test is meaningless.
+	 */
+	if (is_virt) {
+		printf("virt:\t[%s-%u]\t%s\tN/A\n",
+		       test_algo_name(algo), key_len * 8, test_mode_name(mode));
+		return 0;
+	}
+
 	nsec = DURATION * 1000000000;
 
 	test_get_rng(config.iv, sizeof(config.iv));
